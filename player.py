@@ -71,12 +71,42 @@ class Player(Creature):
 		if func:
 			func(self)
 		else:
-			disp.prompt("Invalid keypress '{}'".format(k.replace('\n','ENTER')))
+			self._disp.prompt("Invalid keypress '{}'".format(k.replace('\n','ENTER')))
 
 	def _fffff(self):
 		self._disp.prompt("You fall on your sword")
 		self._disp.screen.getkey()
 		self._health = 0
+
+
+	def _command(self):
+		i = 1
+		self._disp._prompt.addch(0,0,':')
+		self._disp._prompt.refresh()
+		string = ""
+		k = None
+		while True:
+			k = self._disp.screen.getkey()
+			if k == "KEY_BACKSPACE":
+				string = string[:-1]
+				self._disp._prompt.addch(0,i,' ')
+				self._disp._prompt.refresh()
+				continue
+			elif k == '\n':
+				break
+			self._disp._prompt.addch(0,i,k)
+			self._disp._prompt.refresh()
+			string += k
+			i += 1
+	
+		try:
+			g = getattr(self, string)
+			if g:
+				self._invoke(g)
+			self._disp.blank_prompt()
+		except Exception as e:
+			self._disp.prompt("There was an error with your command: " + str(e))
+	
 
 	_controls = {
 		'KEY_RIGHT': lambda s: Player._invoke(s,Player.move_right),
@@ -95,5 +125,6 @@ class Player(Creature):
 		'i': lambda s: Player._invoke(s,Player.show_inv),
 		',': lambda s: Player._invoke(s,Player.pickup),
 
-		'.': lambda: None,
+		'.': lambda s: None,
+		':': lambda s: Player._invoke(s,Player._command)
 }
