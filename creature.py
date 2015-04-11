@@ -34,7 +34,7 @@ class Creature():
 		dy = self._y - p._y
 
 		if (dx == 0 and abs(dy) == 1) or (abs(dx) == 1 and dy == 0):
-			p._takedamage(1)
+			p._takedamage(1, source=self)
 			
 
 		elif abs(dx) > abs(dy):

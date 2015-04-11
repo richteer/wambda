@@ -93,14 +93,8 @@ def main(s):
 				break
 			else:
 				c._tick()
-
+		'''
 		k = disp.screen.getkey()
-
-		for c in z.creatures:
-			if c._initiative <= 0:
-				continue
-			else:
-				c._tick()
 
 		disp.blank_prompt()
 		func = controls.get(k)
@@ -108,11 +102,21 @@ def main(s):
 			func()
 		else:
 			disp.prompt("Invalid keypress '{}'".format(k.replace('\n','ENTER')))
-		if player._health == 0:
+'''
+		player._tick()
+
+		for c in z.creatures:
+			if c._initiative <= 0:
+				continue
+			else:
+				c._tick()
+
+		if player._health <= 0:
 			disp.blank_prompt()
 			disp.prompt("Oh noes \o/")
 			quit = True
 			disp.screen.getkey()
+
 
 if __name__ == "__main__":
 	curses.wrapper(main)

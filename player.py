@@ -26,6 +26,7 @@ class Player(Creature):
 		self._health -= amount
 		if source:
 			self._disp.prompt("You take {} damage from the {}".format(amount, source._name))
+			self._disp.screen.getkey()
 
 	def pickup(self):
 		it = self._zone.tiles[self._y][self._x].item
@@ -43,24 +44,56 @@ class Player(Creature):
 	def show_inv(self):
 		things = [d for d in dir(self) if not d.startswith('_')]
 		win = curses.newwin(len(things), curses.COLS, 0,0)
-		
+
 		for i in range(len(things)):
 			win.addstr(i,0,"{}.) {}".format(chr(i + ord('a')), things[i]))
 
 		win.refresh()
 		k = ord(self._disp.screen.getkey()) - ord('a')
-		
+
 
 		win.erase()
 		del win
 		self._disp.blank_prompt()
 
+		self._disp.blank_prompt()
+		self._disp.screen.refresh()	
 		if k >= 0 and k < len(things):
 			foo = getattr(self, things[k])
-			self._invoke(foo)	
+			self._invoke(foo)
+		
+
+	def _tick(self):
+		k = self._disp.screen.getkey()
+
+		self._disp.blank_prompt()
+		func = self._controls.get(k)
+		if func:
+			func(self)
+		else:
+			disp.prompt("Invalid keypress '{}'".format(k.replace('\n','ENTER')))
 
 	def _fffff(self):
 		self._disp.prompt("You fall on your sword")
 		self._disp.screen.getkey()
 		self._health = 0
 
+	_controls = {
+		'KEY_RIGHT': lambda s: Player._invoke(s,Player.move_right),
+		'KEY_LEFT': lambda s: Player._invoke(s,Player.move_left),
+		'KEY_DOWN': lambda s: Player._invoke(s,Player.move_down),
+		'KEY_UP': lambda s: Player._invoke(s,Player.move_up),
+
+		'l': lambda s: Player._invoke(s,Player.move_right),
+		'h': lambda s: Player._invoke(s,Player.move_left),
+		'j': lambda s: Player._invoke(s,Player.move_down),
+		'k': lambda s: Player._invoke(s,Player.move_up),
+
+		'd': lambda s: Player._takedamage(s,1),
+		'f': lambda s: Player._invoke(s,Player._fffff),
+		'q': lambda s: Player._invoke(s,Player._fffff),
+		'i': lambda s: Player._invoke(s,Player.show_inv),
+		',': lambda s: Player._invoke(s,Player.pickup),
+
+		'.': lambda: None,
+}

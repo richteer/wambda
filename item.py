@@ -1,3 +1,5 @@
+import curses
+
 class Item():
 	ch = '~'
 	func = None
@@ -35,6 +37,40 @@ def attack(self):
 		self._disp.prompt("You attack the air")
 
 
+def bind(self):
+	if self.__class__.__name__ != "Player":
+		return
+
+	self._disp.prompt("What key to bind?")
+	key = self._disp.screen.getkey()
+	self._disp.blank_prompt()
+	self._disp.prompt("Which lambda to bind? (any key for list)")
+	self._disp.screen.getkey()
+	
+	things = [d for d in dir(self) if not d.startswith('_')]
+	win = curses.newwin(len(things), curses.COLS, 0,0)
+
+	for i in range(len(things)):
+		win.addstr(i,0,"{}.) {}".format(chr(i + ord('a')), things[i]))
+
+	win.refresh()
+	k = ord(self._disp.screen.getkey()) - ord('a')
+
+
+	win.erase()
+	del win
+	self._disp.blank_prompt()
+
+	if k >= 0 and k < len(things):
+		foo = getattr(self, things[k])
+		self._controls[key] = lambda s: foo(s)
+
+	self._disp.blank_prompt()
+	self._disp.screen.refresh()	
+	self._disp.prompt("Bound key '{}' to lambda '{}'".format(key, things[k]))
+
+
 def genitems(zone):
+	zone.tiles[5][5].item = Item('b', bind)
 	zone.tiles[10][10].item = Item('y', attack)
 	zone.tiles[8][8].item = Item('*', 17)
