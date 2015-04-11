@@ -16,18 +16,32 @@ class Tile():
 class Zone():
 
 	tiles = []
-
+	creatures = []
 
 	# TODO: Better zone generation here
 	def __init__(self, y, x):
 		wall = Tile(' ', True)
 		self.tiles = [[wall for j in range(x)] for i in range(y)]
+		
+		self.tiles[2][15] = Tile("+", True)
+		self.tiles[2][2] = Tile("+", True)
+		self.tiles[15][2] = Tile("+", True)
+		self.tiles[15][15] = Tile("+", True)
+		for i in range(3,15):
+			self.tiles[i][2] = Tile('|', True)
+			self.tiles[i][15] = Tile('|', True)
+		for i in range(3,15):
+			self.tiles[2][i] = Tile('-', True)
+			self.tiles[15][i] = Tile('-', True)
 
-		for i in range(5,15):
-			for j in range(5,15):
+		for i in range(3,15):
+			for j in range(3,15):
 				self.tiles[i][j] = Tile('.', False)
 
 	def add_creature(self, creature):
 		if self.tiles[creature._y][creature._x].solid:
 			return None # Invalid drop spot
 		self.tiles[creature._y][creature._x].creature = creature
+		creature._zone = self
+		self.creatures.append(creature)
+		self.creatures.sort(key=lambda x: x._initiative)
